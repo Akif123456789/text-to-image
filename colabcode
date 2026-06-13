@@ -1,0 +1,36 @@
+!pip install diffusers transformers accelerate safetensors huggingface_hub --quiet
+
+from huggingface_hub import login
+
+from huggingface_hub import login
+
+# Replace " " with your actual HF token
+login("")
+
+import torch
+torch.cuda.is_available()
+
+from diffusers import StableDiffusionPipeline
+import torch
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
+pipe = StableDiffusionPipeline.from_pretrained(
+    "runwayml/stable-diffusion-v1-5",
+    torch_dtype=torch.float16 if device=="cuda" else torch.float32
+).to(device)
+
+prompt = "art a anime character"
+image = pipe(prompt).images[0]
+image 
+
+def count_params(model):
+    return sum(p.numel() for p in model.parameters())
+
+def show(name, model):
+    params = count_params(model)
+    print(f"{name}: {params:,} (~{params/1e6:.2f}M / {params/1e9:.2f}B)")
+
+show("UNet", pipe.unet)
+show("VAE", pipe.vae)
+show("Text Encoder", pipe.text_encoder)
